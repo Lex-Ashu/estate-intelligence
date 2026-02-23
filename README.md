@@ -29,11 +29,13 @@ It outputs a single numerical value: the estimated price of the house in INR.
 
 ## Model Performance
 
-*(This section will be populated once the model training phase is complete)*
+Based on the evaluation of the cleaned test dataset:
 
-- Baseline (Linear Regression): TBD
-- Decision Tree: TBD
-- Random Forest: TBD
+- Baseline (Linear Regression):	`RMSE = 1,331,071 | R² = 0.6495`
+- Decision Tree: `RMSE = 1,715,038 | R² = 0.4181`
+- Random Forest (tuned): `RMSE = 1,407,359 | R² = 0.6081`
+
+The tuned Random Forest model was selected for the application due to its robustness against overfitting and its ability to handle feature interactions, achieving a validated CV R² of ~0.608.
 
 ## Local Setup
 
