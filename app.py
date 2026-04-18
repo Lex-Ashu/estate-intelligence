@@ -7,6 +7,8 @@ Built with Streamlit · Pandas · NumPy · Matplotlib · Joblib
 # IMPORTS
 # ──────────────────────────────────────────────────────────────
 import os
+from dotenv import load_dotenv
+load_dotenv()
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -15,23 +17,42 @@ import matplotlib.pyplot as plt
 # ──────────────────────────────────────────────────────────────
 # PAGE CONFIG  (must be first Streamlit call)
 # ──────────────────────────────────────────────────────────────
+import joblib
+from sklearn.preprocessing import StandardScaler
+from sklearn.model_selection import train_test_split
+
 st.set_page_config(
     page_title="Estate Intelligence",
     layout="wide",
 )
 
 # ──────────────────────────────────────────────────────────────
-# MODEL LOADING  ← FIXED: correct filename best_rf_model.joblib
+# MODEL LOADING
 # ──────────────────────────────────────────────────────────────
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "models", "best_rf_model.joblib")
+DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "cleaned", "Housing_cleaned.csv")
+
 model = None
+scaler = None
+feature_importances = None
 
 try:
-    import joblib
-    if os.path.exists(MODEL_PATH):
+    if os.path.exists(MODEL_PATH) and os.path.exists(DATA_PATH):
         model = joblib.load(MODEL_PATH)
+
+        _df = pd.read_csv(DATA_PATH)
+        _FEATURE_COLS = [c for c in _df.columns if c != "price"]
+        _X = _df[_FEATURE_COLS]
+        _y = _df["price"]
+        _X_train, _, _, _ = train_test_split(_X, _y, test_size=0.2, random_state=42)
+        scaler = StandardScaler()
+        scaler.fit(_X_train)
+
+        feature_importances = dict(zip(_FEATURE_COLS, model.feature_importances_))
 except Exception:
-    model = None  # app continues in estimate mode
+    model = None
+    scaler = None
+    feature_importances = None
 
 # ──────────────────────────────────────────────────────────────
 # REAL FEATURE IMPORTANCES from trained Random Forest
@@ -84,10 +105,9 @@ def predict_price(area, bedrooms, bathrooms, stories, mainroad,
         "furnishingstatus": furnishingstatus,
     }])[FEATURE_COLUMNS]  # enforce column order to match training
 
-    if model is not None:
-        return model.predict(input_df)[0]
+    if model is not None and scaler is not None:
+        return model.predict(scaler.transform(input_df))[0]
     else:
-        # Fallback estimate formula
         return (area * 480 + bedrooms * 45000 + bathrooms * 35000
                 + stories * 20000 + airconditioning * 80000
                 + prefarea * 60000)
@@ -371,7 +391,17 @@ with tab1:
         st.markdown("#### Feature Importance (Trained Random Forest)")
         st.caption("How much each feature contributed to the model's predictions.")
 
-        fi_sorted = dict(sorted(FEATURE_IMPORTANCES.items(), key=lambda x: x[1]))
+        _label_map = {
+            "area": "Area", "bedrooms": "Bedrooms", "bathrooms": "Bathrooms",
+            "stories": "Stories", "mainroad": "Main Road", "guestroom": "Guest Room",
+            "basement": "Basement", "hotwaterheating": "Hot Water", "airconditioning": "AC",
+            "parking": "Parking", "prefarea": "Preferred Area", "furnishingstatus": "Furnishing",
+        }
+        if feature_importances:
+            raw = {_label_map.get(k, k): v for k, v in feature_importances.items()}
+        else:
+            raw = FEATURE_IMPORTANCES
+        fi_sorted = dict(sorted(raw.items(), key=lambda x: x[1]))
 
         fig, ax = plt.subplots(figsize=(8, 4.5))
         fig.patch.set_facecolor("#0a1628")
