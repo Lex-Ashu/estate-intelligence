@@ -149,170 +149,321 @@ def format_inr(amount):
 # ──────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
-    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
-
-    .stApp {
-        background: linear-gradient(135deg, #0a1628 0%, #112240 50%, #0a1628 100%);
+    :root {
+        --canvas:       #f7f8fa;
+        --panel:        #ffffff;
+        --panel-muted:  #f5f6f8;
+        --border:       #e5e7eb;
+        --border-soft:  #eef0f3;
+        --text:         #0f172a;
+        --text-muted:   #64748b;
+        --text-subtle:  #94a3b8;
+        --accent:       #2563eb;
+        --accent-hover: #1d4ed8;
+        --accent-soft:  #eff4ff;
+        --success:      #059669;
+        --success-soft: #ecfdf5;
+        --warning:      #d97706;
+        --warning-soft: #fffbeb;
+        --danger:       #dc2626;
     }
 
+    html, body, [class*="css"], .stApp, .stMarkdown, .stButton, .stTextInput, .stSelectbox, .stRadio {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
+        -webkit-font-smoothing: antialiased;
+    }
+
+    .stApp { background: var(--canvas); }
+
+    .block-container {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        max-width: 1200px;
+    }
+
+    /* ── Sidebar ─────────────────────────────────── */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #0d1f3c 0%, #162a50 100%);
-        border-right: 1px solid rgba(100,160,255,0.15);
+        background: var(--panel);
+        border-right: 1px solid var(--border);
     }
     section[data-testid="stSidebar"] .stMarkdown p,
-    section[data-testid="stSidebar"] .stMarkdown li,
+    section[data-testid="stSidebar"] .stMarkdown li {
+        color: var(--text-muted) !important;
+        font-size: 0.88rem;
+        line-height: 1.55;
+    }
     section[data-testid="stSidebar"] .stMarkdown h1,
     section[data-testid="stSidebar"] .stMarkdown h2,
-    section[data-testid="stSidebar"] .stMarkdown h3 {
-        color: #cdd9e5 !important;
+    section[data-testid="stSidebar"] .stMarkdown h3,
+    section[data-testid="stSidebar"] .stMarkdown strong {
+        color: var(--text) !important;
+    }
+    section[data-testid="stSidebar"] hr {
+        border-color: var(--border-soft);
+        margin: 1rem 0;
     }
 
+    /* ── Headings ────────────────────────────────── */
+    h1, h2, h3, h4, h5 { color: var(--text) !important; letter-spacing: -0.01em; }
+    h3 { font-size: 1.15rem !important; font-weight: 600 !important; }
+    h4 { font-size: 1rem !important; font-weight: 600 !important; }
+
+    .main-title {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--text) !important;
+        margin: 0 0 0.2rem 0;
+        letter-spacing: -0.02em;
+    }
+    .sub-title {
+        color: var(--text-muted) !important;
+        font-size: 0.95rem;
+        margin: 0 0 1.2rem 0;
+    }
+
+    /* ── Tabs ────────────────────────────────────── */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 0.25rem;
+        border-bottom: 1px solid var(--border);
+        background: transparent;
+    }
     .stTabs [data-baseweb="tab"] {
-        background: rgba(255,255,255,0.04);
-        border-radius: 8px 8px 0 0;
-        color: #8babc7;
-        padding: 10px 24px;
-        font-weight: 600;
+        background: transparent;
+        color: var(--text-muted);
+        padding: 0.65rem 1.1rem;
+        font-weight: 500;
+        font-size: 0.92rem;
+        border: none;
+        border-bottom: 2px solid transparent;
+        border-radius: 0;
+        transition: color 0.15s ease, border-color 0.15s ease;
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        color: var(--text);
+        background: transparent;
     }
     .stTabs [aria-selected="true"] {
-        background: rgba(100,160,255,0.12) !important;
-        color: #64a0ff !important;
-        border-bottom: 2px solid #64a0ff;
-    }
-
-    .stButton > button {
-        background: linear-gradient(135deg, #1a5aff, #0d3fb8);
-        color: #ffffff;
-        border: none;
-        border-radius: 10px;
-        padding: 0.6rem 2rem;
+        color: var(--accent) !important;
+        background: transparent !important;
+        border-bottom: 2px solid var(--accent) !important;
         font-weight: 600;
-        font-size: 1rem;
-        transition: all 0.25s ease;
-        box-shadow: 0 4px 15px rgba(26,90,255,0.3);
     }
-    .stButton > button:hover {
-        background: linear-gradient(135deg, #3373ff, #1a5aff);
-        box-shadow: 0 6px 20px rgba(26,90,255,0.45);
-        transform: translateY(-1px);
+    .stTabs [data-baseweb="tab-panel"] { padding-top: 1.5rem; }
+
+    /* ── Buttons ─────────────────────────────────── */
+    .stButton > button, .stDownloadButton > button {
+        background: var(--accent);
+        color: #ffffff;
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        padding: 0.55rem 1.5rem;
+        font-weight: 500;
+        font-size: 0.92rem;
+        box-shadow: none;
+        transition: background 0.15s ease, border-color 0.15s ease;
+    }
+    .stButton > button:hover, .stDownloadButton > button:hover {
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
+        box-shadow: none;
+        transform: none;
+        color: #ffffff;
+    }
+    .stButton > button:focus, .stDownloadButton > button:focus {
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.18);
+        outline: none;
     }
 
+    /* ── Inputs ──────────────────────────────────── */
+    .stSelectbox label, .stSlider label, .stRadio label,
+    .stFileUploader label, .stNumberInput label, .stTextInput label {
+        color: var(--text) !important;
+        font-weight: 500;
+        font-size: 0.88rem;
+    }
+    .stNumberInput input, .stTextInput input {
+        background: var(--panel) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 8px !important;
+        color: var(--text) !important;
+        font-size: 0.92rem !important;
+    }
+    .stNumberInput input:focus, .stTextInput input:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(37,99,235,0.12) !important;
+    }
+    div[data-baseweb="select"] > div {
+        background: var(--panel) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 8px !important;
+    }
+
+    /* ── Price box ───────────────────────────────── */
     .price-box {
-        background: linear-gradient(135deg, #0d3fb8 0%, #1a5aff 100%);
-        border: 1px solid rgba(100,160,255,0.25);
-        border-radius: 16px;
-        padding: 28px 32px;
-        text-align: center;
-        margin: 20px auto;
-        max-width: 480px;
-        box-shadow: 0 8px 32px rgba(13,63,184,0.4);
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 1.5rem 2rem;
+        margin: 1.25rem 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        position: relative;
+        overflow: hidden;
+    }
+    .price-box::before {
+        content: "";
+        position: absolute;
+        left: 0; top: 0; bottom: 0;
+        width: 3px;
+        background: var(--accent);
     }
     .price-box .label {
-        color: #a3c4f3;
-        font-size: 0.95rem;
-        font-weight: 600;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        font-weight: 500;
         text-transform: uppercase;
-        letter-spacing: 1.5px;
-        margin-bottom: 6px;
+        letter-spacing: 0.06em;
     }
     .price-box .price {
-        color: #ffffff;
-        font-size: 2.4rem;
-        font-weight: 800;
+        color: var(--text);
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
     }
 
-    h1, h2, h3 { color: #e2eaf3 !important; }
-    .main-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: #ffffff !important;
-        margin-bottom: 0;
-    }
-    .sub-title { color: #8babc7 !important; font-size: 1rem; margin-top: 0; }
-
-    .stSelectbox label, .stSlider label,
-    .stRadio label, .stFileUploader label {
-        color: #cdd9e5 !important;
-        font-weight: 500;
-    }
-
+    /* ── Status badges ───────────────────────────── */
     .status-badge {
-        display: inline-block;
-        padding: 5px 14px;
-        border-radius: 20px;
-        font-size: 0.82rem;
-        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.25rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+        border: 1px solid;
     }
     .status-ready {
-        background: rgba(34,197,94,0.15);
-        color: #22c55e;
-        border: 1px solid rgba(34,197,94,0.3);
+        background: var(--success-soft);
+        color: var(--success);
+        border-color: #a7f3d0;
+    }
+    .status-ready::before {
+        content: "";
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--success);
     }
     .status-estimate {
-        background: rgba(250,204,21,0.15);
-        color: #facc15;
-        border: 1px solid rgba(250,204,21,0.3);
+        background: var(--warning-soft);
+        color: var(--warning);
+        border-color: #fde68a;
+    }
+    .status-estimate::before {
+        content: "";
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--warning);
     }
 
+    /* ── Insight cards ───────────────────────────── */
     .insight-card {
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(100,160,255,0.15);
-        border-radius: 12px;
-        padding: 16px 20px;
-        margin-bottom: 12px;
-        color: #cdd9e5;
-        font-size: 0.92rem;
-        line-height: 1.6;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 0.85rem 1.1rem;
+        margin-bottom: 0.6rem;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.55;
     }
+    .insight-card strong { color: var(--text); font-weight: 600; }
 
+    /* ── Footer ──────────────────────────────────── */
     .footer {
         text-align: center;
-        color: #5a7a9a;
-        font-size: 0.8rem;
-        margin-top: 50px;
-        padding: 16px 0;
-        border-top: 1px solid rgba(100,160,255,0.1);
+        color: var(--text-subtle);
+        font-size: 0.78rem;
+        margin-top: 3rem;
+        padding: 1rem 0;
+        border-top: 1px solid var(--border-soft);
     }
 
-    /* Agent trace timeline */
+    /* ── Agent trace timeline ────────────────────── */
     .trace-step {
         display: flex;
         align-items: flex-start;
-        gap: 12px;
-        padding: 10px 14px;
-        margin-bottom: 8px;
-        background: rgba(34,197,94,0.06);
-        border-left: 3px solid #22c55e;
+        gap: 0.7rem;
+        padding: 0.6rem 0.9rem;
+        margin-bottom: 0.4rem;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--success);
         border-radius: 6px;
-        color: #cdd9e5;
+        color: var(--text);
         font-family: 'JetBrains Mono', ui-monospace, monospace;
-        font-size: 0.88rem;
+        font-size: 0.82rem;
+        line-height: 1.5;
     }
     .trace-step .tick {
-        color: #22c55e;
-        font-weight: 700;
+        color: var(--success);
+        font-weight: 600;
+        flex-shrink: 0;
     }
 
-    /* Advisory section card */
+    /* ── Advisory section card ───────────────────── */
     .advisory-card {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(100,160,255,0.18);
-        border-radius: 12px;
-        padding: 18px 22px;
-        margin-bottom: 14px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 1rem 1.2rem;
+        margin-bottom: 0.7rem;
     }
     .advisory-card h4 {
-        color: #64a0ff !important;
-        margin: 0 0 10px 0;
-        font-size: 1.02rem;
-        font-weight: 700;
+        color: var(--text) !important;
+        margin: 0 0 0.5rem 0;
+        font-size: 0.95rem;
+        font-weight: 600;
     }
     .advisory-card p, .advisory-card li {
-        color: #d5dee9 !important;
-        font-size: 0.94rem;
+        color: var(--text-muted) !important;
+        font-size: 0.9rem;
         line-height: 1.6;
+    }
+
+    /* ── Expanders ───────────────────────────────── */
+    details[data-testid="stExpander"] {
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+    }
+    details[data-testid="stExpander"] summary {
+        font-weight: 500;
+        color: var(--text);
+        padding: 0.65rem 0.9rem;
+    }
+
+    /* ── Dataframes ──────────────────────────────── */
+    [data-testid="stDataFrame"] {
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* ── Alerts ──────────────────────────────────── */
+    .stAlert {
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        font-size: 0.88rem;
+    }
+
+    /* ── Caption ─────────────────────────────────── */
+    .stCaption, [data-testid="stCaptionContainer"] {
+        color: var(--text-muted) !important;
+        font-size: 0.85rem;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -332,13 +483,13 @@ with st.sidebar:
     # ── Model status indicator ──
     st.markdown("### Model Status")
     if model is not None:
-        st.markdown('<span class="status-badge status-ready">✅ Model Ready</span>',
+        st.markdown('<span class="status-badge status-ready">Model Ready</span>',
                     unsafe_allow_html=True)
-        st.success("Tuned Random Forest loaded successfully.", icon="✅")
+        st.caption("Tuned Random Forest loaded.")
     else:
-        st.markdown('<span class="status-badge status-estimate">Using Estimate Mode</span>',
+        st.markdown('<span class="status-badge status-estimate">Estimate Mode</span>',
                     unsafe_allow_html=True)
-        st.warning("Model file not found. Using placeholder formula.")
+        st.caption("Model file not found. Using placeholder formula.")
 
     st.markdown("---")
 
@@ -399,15 +550,17 @@ with tab1:
 
     with col1:
         area = st.number_input(
-    "Area (sq ft)",
-    min_value=500,
-    max_value=16200,
-    value=3000,
-    step=50,
-    help="Type the property area in square feet"
-)
-        st.info("Model trained on areas 1,650 – 16,200 sq ft. "
-                "Values outside this range may give less accurate predictions.")
+            "Area (sq ft)",
+            min_value=500,
+            max_value=16200,
+            value=3000,
+            step=50,
+            help="Type the property area in square feet",
+        )
+        st.caption(
+            "Model trained on areas 1,650 - 16,200 sq ft. "
+            "Values outside this range may give less accurate predictions."
+        )
         bedrooms        = st.selectbox("Bedrooms", options=[1, 2, 3, 4, 5, 6], index=2)
         bathrooms       = st.selectbox("Bathrooms", options=[1, 2, 3, 4], index=0)
         stories         = st.selectbox("Stories", options=[1, 2, 3, 4], index=0)
@@ -472,34 +625,32 @@ with tab1:
         fi_sorted = dict(sorted(raw.items(), key=lambda x: x[1]))
 
         fig, ax = plt.subplots(figsize=(8, 4.5))
-        fig.patch.set_facecolor("#0a1628")
-        ax.set_facecolor("#0a1628")
-
-        colors = plt.cm.Blues(np.linspace(0.4, 0.95, len(fi_sorted)))
+        fig.patch.set_facecolor("#ffffff")
+        ax.set_facecolor("#ffffff")
 
         bars = ax.barh(
             list(fi_sorted.keys()),
             list(fi_sorted.values()),
-            color=colors,
+            color="#2563eb",
             edgecolor="none",
-            height=0.6,
+            height=0.55,
             zorder=3,
         )
 
         ax.set_xlim(0, 0.56)
-        ax.set_xlabel("Importance Score", color="#8babc7", fontsize=10)
-        ax.tick_params(colors="#8babc7", labelsize=9)
+        ax.set_xlabel("Importance Score", color="#64748b", fontsize=9.5)
+        ax.tick_params(colors="#64748b", labelsize=9)
         for spine in ax.spines.values():
-            spine.set_color("#1e3a5f")
+            spine.set_color("#e5e7eb")
         ax.spines["top"].set_visible(False)
         ax.spines["right"].set_visible(False)
-        ax.grid(axis="x", color="#1e3a5f", linewidth=0.5, zorder=0)
+        ax.grid(axis="x", color="#eef0f3", linewidth=0.8, zorder=0)
 
         for bar in bars:
             w = bar.get_width()
             ax.text(w + 0.008, bar.get_y() + bar.get_height() / 2,
-                    f"{w:.1%}", va="center", color="#a3c4f3",
-                    fontsize=8.5, fontweight=600)
+                    f"{w:.1%}", va="center", color="#0f172a",
+                    fontsize=8.5, fontweight=500)
 
         plt.tight_layout()
         st.pyplot(fig)
@@ -532,7 +683,7 @@ with tab2:
         else:
             st.warning("correlation_heatmap.png not found in notebooks/")
 
-    st.markdown("#### 🔍 Key Findings")
+    st.markdown("#### Key Findings")
     st.markdown("""
     <div class="insight-card">
         <strong>Area dominates (47.8%)</strong> — Property size is by far the strongest predictor of price.
