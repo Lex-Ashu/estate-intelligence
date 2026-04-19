@@ -2,12 +2,14 @@ import os
 import joblib
 import numpy as np
 import pandas as pd
+from typing import Optional
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 
 from agent.state import AgentState
+from report.parser import parse_report
 
 # ── Paths ────────────────────────────────────────────────────────────────────
 _BASE = os.path.dirname(os.path.dirname(__file__))
@@ -111,7 +113,10 @@ def validate_input_node(state: AgentState) -> AgentState:
 
         validated[field] = val
 
-    return {**state, "validated_input": validated, "validation_errors": errors}
+    return {**state, "validated_input": validated, "validation_errors": errors,
+            "agent_steps": list(state.get("agent_steps") or []) + [
+                f"validate_input: {len(errors)} issue(s) found and resolved."
+            ]}
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -122,7 +127,10 @@ def predict_price_node(state: AgentState) -> AgentState:
     features = pd.DataFrame([[inp[col] for col in FEATURE_COLS]], columns=FEATURE_COLS)
     features_scaled = _SCALER.transform(features)
     price = float(_MODEL.predict(features_scaled)[0])
-    return {**state, "predicted_price": price}
+    return {**state, "predicted_price": price,
+            "agent_steps": list(state.get("agent_steps") or []) + [
+                f"predict_price: ML model predicted ₹{price:,.0f}"
+            ]}
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -137,7 +145,7 @@ _FALLBACK_TRENDS = (
 )
 
 
-def _build_retrieval_query(inp: dict, price: float | None) -> str:
+def _build_retrieval_query(inp: dict, price: Optional[float]) -> str:
     """
     Craft a retrieval query from the validated property features so the FAISS
     search surfaces the most relevant market/regulatory chunks.
@@ -183,7 +191,10 @@ def retrieve_trends_node(state: AgentState) -> AgentState:
         errors.append(f"RAG retrieval unavailable ({type(e).__name__}) — using fallback market context")
         trends = _FALLBACK_TRENDS
 
-    return {**state, "market_trends": trends, "validation_errors": errors}
+    return {**state, "market_trends": trends, "validation_errors": errors,
+            "agent_steps": list(state.get("agent_steps") or []) + [
+                "retrieve_trends: RAG tool called — top-k chunks retrieved from FAISS knowledge base."
+            ]}
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -267,4 +278,19 @@ Include standard real estate and financial advice disclaimers (2–3 sentences).
         HumanMessage(content=user_prompt),
     ])
 
-    return {**state, "report": response.content}
+    raw_report = response.content
+
+    try:
+        structured = parse_report(raw_report)
+        report_dict = structured.model_dump()
+    except Exception:
+        report_dict = None
+
+    return {
+        **state,
+        "report": raw_report,
+        "report_structured": report_dict,
+        "agent_steps": list(state.get("agent_steps") or []) + [
+            "generate_report: LLM generated 6-section advisory report via Groq (llama-3.1-8b-instant)."
+        ],
+    }
